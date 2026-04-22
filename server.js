@@ -14,8 +14,19 @@ const io = new Server(server, {
   }
 });
 
-// Serve static files from wwwroot folder
-app.use(express.static(path.join(__dirname, '../wwwroot')));
+// Serve static files from wwwroot folder with proper headers
+app.use(express.static(path.join(__dirname, '../wwwroot'), {
+  setHeaders: (res, filePath) => {
+    // Remove CSP headers that might block fonts
+    res.removeHeader('Content-Security-Policy');
+    // Allow fonts to load
+    if (filePath.endsWith('.ttf') || filePath.endsWith('.woff') || filePath.endsWith('.woff2')) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Content-Type', 'font/ttf');
+    }
+  }
+}));
+
 app.use(cors());
 app.use(express.json());
 
