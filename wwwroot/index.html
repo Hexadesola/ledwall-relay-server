@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ToJ Media House Controller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <img src="tribe_of_judah_logo_small_no_bg.png" alt="ToJ Logo" class="logo" onerror="this.style.display='none'">
+                <h1 style="margin-left: -15px;">ToJ Media House Controller</h1>
+            </div>
+        </header>
+
+        <!-- Menu Bar -->
+        <nav class="menu-bar">
+            <div class="menu-item"><span>File</span>
+                <div class="menu-dropdown">
+                    <div class="menu-option disabled">Reconnect</div>
+                    <div class="menu-option disabled">Disconnect</div>
+                    <div class="menu-separator"></div>
+                    <div class="menu-option" data-action="exit" onclick="handleAction('exit')">Exit</div>
+                </div>
+            </div>
+            <div class="menu-item"><span>View</span>
+                <div class="menu-dropdown">
+                    <div class="menu-option" data-action="showLedsPanel">Show LEDs Panel</div>
+                    <div class="menu-option" data-action="hideLedsPanel">Hide LEDs Panel</div>
+                </div>
+            </div>
+            <div class="menu-item"><span>Tools</span>
+                <div class="menu-dropdown">
+                    <div class="menu-option" data-action="refreshPorts">Refresh COM Ports</div>
+                    <div class="menu-option disabled">Serial Diagnostics</div>
+                    <div class="menu-separator"></div>
+                    <div class="menu-option" data-action="masterOn">Master ON</div>
+                    <div class="menu-option" data-action="masterOff">Master OFF</div>
+                    <div class="menu-option" data-action="allRelaysOff">All Relays OFF</div>
+                    <div class="menu-separator"></div>
+                    <div class="menu-option" data-action="allLedsOff">All LEDs OFF</div>
+                </div>
+            </div>
+            <div class="menu-item"><span>Help</span>
+                <div class="menu-dropdown">
+                    <div class="menu-option" data-action="quickStart">Quick Start</div>
+                    <div class="menu-option" data-action="videoHelp">Open How It Works Video</div>
+                    <div class="menu-option" data-action="connectionHelp">Connection Troubleshooting</div>
+                    <div class="menu-option" data-action="idMap">Relay and LED ID Map</div>
+                    <div class="menu-option" data-action="operatorTips">Operator Tips</div>
+                    <div class="menu-option disabled">Media Help</div>
+                    <div class="menu-separator"></div>
+                    <div class="menu-option" data-action="about">About</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Controller Connection -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Controller Connection</h2>
+                    <span class="connection-badge disconnected" id="connectionBadge">Disconnected</span>
+                </div>
+                <div class="com-port-display">
+                    <span class="port-label">Port:</span>
+                    <span class="port-value" id="currentPort">None</span>
+                </div>
+            </section>
+
+            <!-- Master Control -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Master Control</h2>
+                    <label class="master-switch">
+                        <input type="checkbox" id="masterSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="button-row-full equal-width">
+                    <div class="indicator" id="allLightsIndicator"></div>
+                    <button class="btn btn-on" data-action="allLightsOn">All Lights ON</button>
+                    <button class="btn btn-off" data-action="allLightsOff">All Lights OFF</button>
+                </div>
+                <div class="button-row-full equal-width">
+                    <div class="indicator" id="allDevicesIndicator"></div>
+                    <button class="btn btn-on" data-action="allDevicesOn">All Devices ON</button>
+                    <button class="btn btn-off" data-action="allDevicesOff">All Devices OFF</button>
+                </div>
+                <div class="button-row-full equal-width">
+                    <div class="indicator" id="allLedsIndicator"></div>
+                    <button class="btn btn-on" data-action="allLedsOn">All LEDs ON</button>
+                    <button class="btn btn-off" data-action="allLedOff">All LEDs OFF</button>
+                </div>
+                <div class="button-row-full equal-width">
+                    <div class="indicator" id="autoModeIndicator"></div>
+                    <button class="btn btn-on" data-action="autoModeOn">AUTO Mode ON</button>
+                    <button class="btn btn-off" data-action="autoModeOff">AUTO Mode OFF</button>
+                </div>
+            </section>
+
+            <!-- Front Relay -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Front Relay Control</h2>
+                </div>
+                <h3 class="section-label">Lights</h3>
+                <div class="relay-list" id="frontLightRelays"></div>
+                <div class="button-row-full equal-width">
+                    <button class="btn btn-on" data-action="frontLightsOn">All Front Lights ON</button>
+                    <button class="btn btn-off" data-action="frontLightsOff">All Front Lights OFF</button>
+                </div>
+                
+                <h3 class="section-label">Devices</h3>
+                <div class="relay-list" id="frontDeviceRelays"></div>
+                <div class="button-row-full equal-width">
+                    <button class="btn btn-on" data-action="frontDevicesOn">All Front Devices ON</button>
+                    <button class="btn btn-off" data-action="frontDevicesOff">All Front Devices OFF</button>
+                </div>
+            </section>
+
+            <!-- Back Relay -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Back Relay Control</h2>
+                </div>
+                <h3 class="section-label">Lights</h3>
+                <div class="relay-list" id="backLightRelays"></div>
+                <div class="button-row-full equal-width">
+                    <button class="btn btn-on" data-action="backLightsOn">All Back Lights ON</button>
+                    <button class="btn btn-off" data-action="backLightsOff">All Back Lights OFF</button>
+                </div>
+                
+                <h3 class="section-label">Devices</h3>
+                <div class="relay-list" id="backDeviceRelays"></div>
+                <div class="button-row-full equal-width">
+                    <button class="btn btn-on" data-action="backDevicesOn">All Back Devices ON</button>
+                    <button class="btn btn-off" data-action="backDevicesOff">All Back Devices OFF</button>
+                </div>
+            </section>
+
+            <!-- Colour Selector -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Colour Selector</h2>
+                </div>
+                <div class="selector-info">
+                    <span class="selector-label">Selector Boards:</span>
+                    <span class="selector-value" id="selectedBoardsSummary">No boards selected</span>
+                </div>
+                
+                <h3 class="section-label">Pattern</h3>
+                <select id="patternSelect" class="styled-select">
+                    <option value="1">Solid</option>
+                    <option value="2">Blink</option>
+                    <option value="3">Wipe</option>
+                    <option value="4">Rainbow</option>
+                </select>
+
+                <h3 class="section-label">Speed</h3>
+                <input type="range" id="speedSlider" min="1" max="255" value="100" class="styled-slider black">
+
+                <h3 class="section-label">Red</h3>
+                <input type="range" id="redSlider" min="0" max="255" value="128" class="styled-slider red">
+                
+                <h3 class="section-label">Green</h3>
+                <input type="range" id="greenSlider" min="0" max="255" value="128" class="styled-slider green">
+                
+                <h3 class="section-label">Blue</h3>
+                <input type="range" id="blueSlider" min="0" max="255" value="128" class="styled-slider blue">
+
+                <div class="led-bars" id="ledBars">
+                    <div class="led-bar" id="ledBar1" data-board="1"></div>
+                    <div class="led-bar" id="ledBar2" data-board="2"></div>
+                    <div class="led-bar" id="ledBar3" data-board="3"></div>
+                    <div class="led-bar" id="ledBar4" data-board="4"></div>
+                    <div class="led-bar" id="ledBar5" data-board="5"></div>
+                    <div class="led-bar" id="ledBar6" data-board="6"></div>
+                    <div class="led-bar" id="ledBar7" data-board="7"></div>
+                    <div class="led-bar" id="ledBar8" data-board="8"></div>
+                    <div class="led-bar" id="ledBar9" data-board="9"></div>
+                    <div class="led-bar" id="ledBar10" data-board="10"></div>
+                    <div class="led-bar" id="ledBar11" data-board="11"></div>
+                    <div class="led-bar" id="ledBar12" data-board="12"></div>
+                    <div class="led-bar" id="ledBar13" data-board="13"></div>
+                    <div class="led-bar" id="ledBar14" data-board="14"></div>
+                    <div class="led-bar" id="ledBar15" data-board="15"></div>
+                </div>
+                <div class="color-preview-bar" id="colorPreview"></div>
+
+                <div class="button-row-full" style="flex-wrap: wrap;">
+                    <button class="btn btn-action" data-action="pickColor">Pick Colour</button>
+                    <button class="btn btn-action" data-action="applySelected">Apply to Selected</button>
+                    <button class="btn btn-action" data-action="broadcastAll">Broadcast All</button>
+                    <button class="btn btn-off" data-action="allLedOff">All LED Off</button>
+                </div>
+            </section>
+
+            <!-- Colour Palette -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Colour Palette</h2>
+                </div>
+                <div class="palette-grid">
+                    <button data-r="255" data-g="220" data-b="180" class="btn btn-palette" style="color: rgb(255, 220, 180);">Warm White</button>
+                    <button data-r="255" data-g="0" data-b="0" class="btn btn-palette" style="color: rgb(255, 0, 0); ">Red</button>
+                    <button data-r="0" data-g="255" data-b="0" class="btn btn-palette" style="color: rgb(0, 255, 0);">Green</button>
+                    <button data-r="0" data-g="0" data-b="255" class="btn btn-palette" style="color: rgb(0, 0, 255);">Blue</button>
+                    <button data-r="170" data-g="0" data-b="255" class="btn btn-palette" style="color: rgb(170, 0, 255);">Purple</button>
+                    <button data-r="255" data-g="20" data-b="147" class="btn btn-palette" style="color: rgb(255, 20, 147);">Pink</button>
+                    <button data-r="255" data-g="140" data-b="0" class="btn btn-palette" style="color: rgb(255, 140, 0);">Amber</button>
+                    <button data-r="0" data-g="255" data-b="255" class="btn btn-palette" style="color: rgb(0, 255, 255);">Cyan</button>
+                    <button class="btn btn-palette btn-rainbow" data-rainbow="true">Rainbow</button>
+                </div>
+            </section>
+
+            <!-- Preset Light Shows -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Preset Light Shows</h2>
+                </div>
+                <div class="show-status" id="lightShowStatus">Auto show: Off</div>
+                <div class="interval-control">
+                    <span class="interval-label">Change Interval:</span>
+                    <input type="range" id="intervalSlider" min="15" max="600" value="120" step="15" class="styled-slider">
+                    <span class="interval-value" id="intervalValue">2.0 min</span>
+                </div>
+               
+                <div class="shows-grid">
+                    <button class="btn btn-show" data-show="sunset" style="color:#FDBA74;">Warm Sunset</button>
+                    <button class="btn btn-show" data-show="ocean" style="color: #7DD3FC;">Ocean Flow</button>
+                    <button class="btn btn-show" data-show="royal" style="color: #C4B5FD">Royal Velvet</button>
+
+                    <button class="btn btn-show" data-show="forest" style="color: #86EFAC;">Forest Bloom</button>
+                    <button class="btn btn-show" data-show="festival" style="color: #FDE68A;">Festival Mix</button>
+                    <button class="btn btn-show" data-show="aurora" style="color: #A7F3D0;">Aurora Wave</button>
+
+                    <button class="btn btn-show" data-show="ember" style="color: #FB923C;">Ember Night</button>
+                    <button class="btn btn-show" data-show="jewel" style="color: #F0ABFC;">Jewel Loop</button>
+                    <button class="btn btn-show" data-show="ruby" style="color: #FCA5A5;">Ruby Drift</button>
+
+                    <button class="btn btn-show" data-show="golden" style="color: #FCD34D;">Golden Haze</button>
+                    <button class="btn btn-show" data-show="ice" style="color: #BFDBFE;">Ice Bloom</button>
+                    <button class="btn btn-show" data-show="electric" style="color: #93C5FD;">Electric Pulse</button>
+                </div>
+                <div class="button-row-full" style="margin-top: 8px;">
+                    <button class="btn btn-stop" data-action="stopShow">Stop Show</button>
+                </div>
+            </section>
+
+            <!-- LED Board Layout -->
+            <section class="panel" id="ledBoardLayoutPanel">
+                <div class="panel-header">
+                    <h2>LED Board Layout</h2>
+                </div>
+                
+                <h3 class="section-label">Left Solo</h3>
+                <div class="board-grid" id="leftSoloBoards"></div>
+                
+                <h3 class="section-label">Left Main Stack</h3>
+                <div class="board-grid" id="leftMainBoards"></div>
+                
+                <h3 class="section-label">Hanging Snake</h3>
+                <div class="board-grid" id="hangingSnakeBoards"></div>
+                
+                <h3 class="section-label">Floor Snake</h3>
+                <div class="board-grid" id="floorSnakeBoards"></div>
+                
+                <h3 class="section-label">Right Main Stack</h3>
+                <div class="board-grid" id="rightMainBoards"></div>
+                
+                <h3 class="section-label">Right Solo</h3>
+                <div class="board-grid" id="rightSoloBoards"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>ToJ Media House Controller v001</span>
+            <span class="server-status" id="serverStatus">Server: Starting...</span>
+        </footer>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div class="modal" id="colorPickerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Pick Colour</h3>
+                <button class="modal-close" id="closeColorPicker">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="color" id="colorPickerInput" value="#808080">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="applyColorPicker">Apply</button>
+                <button class="btn btn-action" id="cancelColorPicker">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal for Help/About -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="infoModalTitle">Information</h3>
+                <button class="modal-close" id="closeInfoModal">&times;</button>
+            </div>
+            <div class="modal-body" id="infoModalBody">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeInfoModalBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Start Modal -->
+    <div class="modal" id="quickStartModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Quick Start Guide</h3>
+                <button class="modal-close" id="closeQuickStartModal">&times;</button>
+            </div>
+            <div class="modal-body help-content">
+                <div class="help-section">
+                    <h4>1. Connect to Controller</h4>
+                    <p>Select a COM port in the "Controller Connection" panel and connect. The status will change to "Connected" with a green indicator.</p>
+                </div>
+                <div class="help-section">
+                    <h4>2. Control Lights</h4>
+                    <p>Use the ON/OFF buttons for each relay in the Front and Back Relay Control panels. Individual controls are at the top, or use "All Front Lights ON/OFF" buttons.</p>
+                </div>
+                <div class="help-section">
+                    <h4>3. Control LED Display</h4>
+                    <p>Use the "Colour Selector" panel to choose a pattern (Solid, Blink, Wipe, Rainbow), speed, and color. Click "Apply to Selected" or "Broadcast All" to send to boards.</p>
+                </div>
+                <div class="help-section">
+                    <h4>4. Master Control</h4>
+                    <p>The toggle switch in the Master Control panel controls ALL lights, devices, and LEDs at once. Use the indicator colors to see current state (green=ON, gray=OFF, amber=MIXED).</p>
+                </div>
+                <div class="help-section">
+                    <h4>5. Auto Mode</h4>
+                    <p>Enable Auto Mode to run automatic light shows that cycle through colors and patterns. Use the "Change Interval" slider to control speed.</p>
+                </div>
+                <div class="help-section">
+                    <h4>6. Preset Light Shows</h4>
+                    <p>Choose from 12 preset light shows like "Warm Sunset", "Ocean Flow", "Rainbow", etc. Click a show button to start, "Stop Show" to end.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeQuickStartModalBtn">Got It!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Help Modal -->
+    <div class="modal" id="connectionHelpModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Connection Troubleshooting</h3>
+                <button class="modal-close" id="closeConnectionHelpModal">&times;</button>
+            </div>
+            <div class="modal-body help-content">
+                <div class="help-section">
+                    <h4>Problem: Cannot Connect</h4>
+                    <ul>
+                        <li>Check physical USB connection between computer and controller</li>
+                        <li>Verify the controller is powered on</li>
+                        <li>Try a different USB port on your computer</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>Problem: Port Not Found</h4>
+                    <ul>
+                        <li>Click "Refresh COM Ports" in the Tools menu</li>
+                        <li>Check Device Manager to see if COM port is assigned</li>
+                        <li>Close other programs that might be using the port</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>Problem: Connected but No Response</h4>
+                    <ul>
+                        <li>Verify all cables are securely connected</li>
+                        <li>Check that relay equipment is powered</li>
+                        <li>Try disconnecting and reconnecting</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>Finding COM Port</h4>
+                    <p>Open Windows Device Manager, expand "Ports (COM & LPT)", look for "USB Serial Device" or similar. Note the COM number (e.g., COM7).</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeConnectionHelpModalBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ID Map Modal -->
+    <div class="modal" id="idMapModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Relay and LED ID Map</h3>
+                <button class="modal-close" id="closeIdMapModal">&times;</button>
+            </div>
+            <div class="modal-body help-content">
+                <div class="help-section">
+                    <h4>Relay IDs</h4>
+                    <table class="help-table">
+                        <tr><td><strong>Front Lights</strong></td><td>17, 18, 19, 20</td></tr>
+                        <tr><td><strong>Front Devices</strong></td><td>21 (Camera Power), 22 (AC Socket)</td></tr>
+                        <tr><td><strong>Back Lights</strong></td><td>23, 24, 25, 26</td></tr>
+                        <tr><td><strong>Back Devices</strong></td><td>27 (Moving Head Power), 28 (LED Display Power)</td></tr>
+                    </table>
+                </div>
+                <div class="help-section">
+                    <h4>LED Board Groups</h4>
+                    <table class="help-table">
+                        <tr><td><strong>Left Solo</strong></td><td>Board 15</td></tr>
+                        <tr><td><strong>Left Main</strong></td><td>Boards 1-5</td></tr>
+                        <tr><td><strong>Hanging Snake</strong></td><td>Boards 13, 16</td></tr>
+                        <tr><td><strong>Floor Snake</strong></td><td>Board 12</td></tr>
+                        <tr><td><strong>Right Main</strong></td><td>Boards 6-10</td></tr>
+                        <tr><td><strong>Right Solo</strong></td><td>Board 14</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeIdMapModalBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operator Tips Modal -->
+    <div class="modal" id="operatorTipsModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Operator Tips</h3>
+                <button class="modal-close" id="closeOperatorTipsModal">&times;</button>
+            </div>
+            <div class="modal-body help-content">
+                <div class="help-section">
+                    <h4>Quick Controls</h4>
+                    <ul>
+                        <li><strong>Master Control:</strong> Use the toggle to turn everything on/off at once</li>
+                        <li><strong>All Lights ON/OFF:</strong> Controls both Front and Back lights</li>
+                        <li><strong>All Devices ON/OFF:</strong> Controls Camera Power, AC Socket, Moving Head, LED Display</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>LED Display</h4>
+                    <ul>
+                        <li>LED Display Power (Relay 28) must be ON for any LED patterns to show</li>
+                        <li>Use "All LEDs ON" to quickly enable display with white color</li>
+                        <li>Use "All LEDs OFF" to turn off all LED activity</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>Auto Mode</h4>
+                    <ul>
+                        <li>Auto Mode automatically cycles through light shows</li>
+                        <li>Use "Change Interval" to set how long each show lasts (15 sec to 10 min)</li>
+                        <li>Manual control overrides Auto Mode temporarily</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>Colour Presets</h4>
+                    <ul>
+                        <li>Use Colour Palette for quick access to preset colors</li>
+                        <li>"Rainbow" button sets rainbow pattern with high speed</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeOperatorTipsModalBtn">Got It!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>About</h3>
+                <button class="modal-close" id="closeAboutModal">&times;</button>
+            </div>
+            <div class="modal-body help-content" style="text-align: center;">
+                <div style="margin-bottom: 20px;">
+                    <img src="tribe_of_judah_logo_small_no_bg.png" alt="ToJ Logo" style="max-width: 100px; opacity: 0.8;" onerror="this.style.display='none'">
+                </div>
+                <h2 style="color: var(--text); margin-bottom: 10px;">ToJ Media House Controller</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem;">Version 001</p>
+                <p style="color: var(--text-muted); margin-top: 20px;">WPF & Web Remote Control for LED Wall and Relay Systems</p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--panel-border);">
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 5px 0;"><strong>Designer:</strong> Adesola Adeniran</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 5px 0;"><strong>Email:</strong> adesola4pc@gmail.com</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 5px 0;"><strong>Website:</strong> adesola_adeniran.com</p>
+                </div>
+                <p style="color: var(--text-muted); margin-top: 30px; font-size: 0.85rem;">Built with .NET 8, WPF, ASP.NET Core, and SignalR</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeAboutModalBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refresh COM Ports Modal -->
+    <div class="modal" id="refreshPortsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Refresh COM Ports</h3>
+                <button class="modal-close" id="closeRefreshPortsModal">&times;</button>
+            </div>
+            <div class="modal-body help-content">
+                <p style="color: var(--text-muted); text-align: center;">Click the button below to scan for available COM ports.</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-action" onclick="refreshPortsList()">Scan for COM Ports</button>
+                </div>
+                <h4 style="color: var(--accent); font-size: 0.9rem; margin-bottom: 8px;">Available COM Ports:</h4>
+                <div id="comPortsList" style="color: var(--text-muted); font-size: 0.85rem; min-height: 40px; padding: 10px; background: var(--bg); border-radius: 6px; text-align: center;">
+                    Click "Scan for COM Ports" to search...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeRefreshPortsModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>How It Works</h3>
+                <button class="modal-close" id="closeVideoModal">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 20px;">
+                <video id="howItWorksVideo" controls style="max-width: 100%; border-radius: 8px; background: #000;">
+                    <source src="how_it_works.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeVideoModalBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Boards Selected Modal -->
+    <div class="modal" id="noBoardsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>No Boards Selected</h3>
+                <button class="modal-close" id="closeNoBoardsModal">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 30px 20px;">
+                <img src="tribe_of_judah_logo_small_no_bg.png" alt="ToJ Logo" style="max-width: 80px; opacity: 0.8; margin-bottom: 15px;" onerror="this.style.display='none'">
+                <p style="color: var(--text-muted); font-size: 1rem; margin-top: 15px;">Please select at least one board from the LED Board Layout panel first.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-action" id="closeNoBoardsModalBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exit Confirmation Modal -->
+    <div class="modal" id="exitConfirmModal" style="z-index: 1000;">
+        <div class="modal-content" style="max-width: 350px;">
+            <div class="modal-header">
+                <h3>Exit</h3>
+                <button class="modal-close" id="closeExitModal">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 40px 20px;">
+                <img src="tribe_of_judah_logo_small_no_bg.png" alt="Tribe of Judah" style="max-width: 120px; opacity: 0.9; margin: 0 auto 20px; display: block;" onerror="this.style.display='none'; this.parentNode.innerHTML='<span style=font-size:48px;>✝</span>';">
+                <p style="color: var(--text-primary); font-size: 1.2rem;">Are you sure you want to exit?</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">Close this browser window to exit.</p>
+            </div>
+            <div class="modal-footer" style="justify-content: center; gap: 15px;">
+                <button class="btn btn-stop" id="confirmExitBtn" style="min-width: 100px;">Exit</button>
+                <button class="btn btn-action" id="cancelExitBtn" style="min-width: 100px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
